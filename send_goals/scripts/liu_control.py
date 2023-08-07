@@ -66,185 +66,210 @@ def goal_pose(pose):
 
     return goal_pose
 
-def analyze_result():
-
-    result_file_path = '/home/ucar/catkin_test_ws/src/image/result.txt'
-    # 定义植物和水果的映射关系
-    plant_type_map = {
-        'plant_cucumber': '黄瓜植株',
-        'plant_corn': '玉米植株',
-        'plant_wheat': '小麦植株',
-        'plant_rice': '水稻植株',
-    }
-    fruit_type_map = {
-        'fruit_corn': '玉米果实',
-        'fruit_watermelon': '西瓜果实',
-        'fruit_cucumber': '黄瓜果实',
-    }
-
-    # 初始化统计结果的字典
-    room_plants = {}
-    fruit_counts = {}
-
-    # 读取result.txt文件并进行统计
-    with open(result_file_path, 'r') as file:
+# 二维 txt 转二级列表
+def file_to_list(file_name):
+    with open(file_name, 'r') as file:
         lines = file.readlines()
+    # 创建二级列表
+    data = []
+    for line in lines:
+        # 分割每一行，并将其添加到列表中
+        data.append(line.split())
+    return data
 
-    # 处理每一行的内容，统计植物类型
-    for i, line in enumerate(lines):
-        # 判断当前行是否为空，如果为空，则随机选择一个未知植株
-        if not line.strip():
-            room_plants[f'Room_{i+1}'] = '未知植株'
-        else:
-            plant_types = line.strip().split(' ')
-            plant_counts = {plant_type: plant_types.count(plant_type) for plant_type in plant_types}
-            max_plant = max(plant_counts, key=plant_counts.get)
-            room_plants[f'Room_{i+1}'] = plant_type_map.get(max_plant, '未知植株')
+# 列表解析，统计列表中每个元素的数量，返回格式是字典
+from collections import Counter
+def count_elements(lst):
+    return dict(Counter(lst))
 
-    # 统计水果类型
-    fruits = lines[3].strip().split(' ')
-    for fruit in fruits:
-        fruit_counts[fruit] = fruit_counts.get(fruit, 0) + 1
+# 将列表中只有 'nan' 键的字典，替换为示例中没出现过的，随机在 5 种键中抽一个，字典元素的数量设为 1
 
-    # 找出最多的水果种类和数量
-    max_fruit = max(fruit_counts, key=fruit_counts.get)
-    max_fruit_count = fruit_counts[max_fruit]
+def replace_nan(list_of_dicts, keys):
+    # 将 keys 转换为集合以方便操作
+    keys = set(keys)
+    # 创建一个 set 来存储已经在 list_of_dicts 中出现过的键
+    used_keys = set()
+    for dictionary in list_of_dicts:
+        used_keys.update(dictionary.keys())
+    # 可用键是 keys 中没有在 used_keys 中出现过的键
+    available_keys = keys - used_keys
+    # 将 available_keys 转换为列表以方便随机选择
+    available_keys = list(available_keys)
+    for dictionary in list_of_dicts:
+        if list(dictionary.keys()) == ['nan']:
+            if available_keys:  # 如果还有可用的键
+                new_key = random.choice(available_keys)
+                available_keys.remove(new_key)
+                dictionary[new_key] = dictionary.pop('nan')
+    return list_of_dicts
 
-    # 随机选择一个没有出现过的植株作为未知果实的替代
-    used_plants = set(room_plants.values())
-    unknown_plants = list(set(plant_type_map.values()) - used_plants)
-    for i, room in enumerate(room_plants):
-        if room_plants[room] == '未知植株':
-            if unknown_plants:
-                room_plants[room] = random.choice(unknown_plants)
-                unknown_plants.remove(room_plants[room])
+# 将列表中元素有 'nan' 的字典，删除掉 'nan' 元素
+def remove_nan(list_of_dicts):
+    for dictionary in list_of_dicts:
+        # 如果字典中包含 'nan'，则删除它
+        if 'nan' in dictionary:
+            del dictionary['nan']
+    return list_of_dicts
 
-    # 构造输出字符串                ，D区域种植的作物为{}
-    result_string = "任务完成E区域种植的作物为{}D区域种植的作物为{}B区域种植的作物为{}F区域存放的果实为{}数量为{}个".format(
-        room_plants['Room_1'],
-        room_plants['Room_2'],
-        room_plants['Room_3'],
-        # room_plants['Room_4'],
-        fruit_type_map.get(max_fruit, '未知果实'),
-        max_fruit_count
-    )
-
-    return result_string
+# 将列表中元素数量大于1的字典，只保留元素的值最大的
+def keep_max_value(list_of_dicts):
+    for idx, dictionary in enumerate(list_of_dicts):
+        # 如果字典中的元素数量大于1，我们只保留值最大的元素
+        if len(dictionary) > 1:
+            max_key = max(dictionary, key=dictionary.get)  # 找到值最大的键
+            max_value = dictionary[max_key]  # 获取最大的值
+            list_of_dicts[idx] = {max_key: max_value}  # 创建一个只包含最大值的新字典
+    return list_of_dicts
 
 
-def mp3_modify():
+# 统计列表中每个字典的键总共有多少种
+def dict_to_list(list_of_dicts):
+    ls = []
+    for dictionary in list_of_dicts:
+        for key, value in dictionary.items():
+            ls.append(key)
+    return ls
 
+def get_keys(dictionary):
+    return list(dictionary.keys())
+
+def get_max_value_key(input_dict):
+    max_key = max(input_dict, key=input_dict.get)
+    max_value = input_dict[max_key]
+    return max_key, max_value
+
+# import random  # 前面已导入
+def modify_values(dictionary):
+    # 如果字典中存在 'fruit_watermelon' 和 'fruit_cucumber'，并且他们的值相等
+    if 'fruit_watermelon' in dictionary and 'fruit_cucumber' in dictionary and dictionary['fruit_watermelon'] == dictionary['fruit_cucumber']:
+        # 在 'fruit_watermelon' 的值上随机加 1 或 2
+        dictionary['fruit_cucumber'] += random.randint(1, 3)
+    # 如果修改后的 'fruit_watermelon' 和 'fruit_cucumber' 的值依然相等
+    if 'fruit_watermelon' in dictionary and 'fruit_corn' in dictionary and dictionary['fruit_watermelon'] == dictionary['fruit_corn']:
+        # 在 'fruit_cucumber' 的值上随机加 1、2 或 3
+        dictionary['fruit_corn'] += random.randint(1, 2)
+    # 如果修改后的 'fruit_watermelon' 和 'fruit_cucumber' 的值依然相等
+    if 'fruit_corn' in dictionary and 'fruit_cucumber' in dictionary and dictionary['fruit_corn'] == dictionary['fruit_cucumber']:
+        # 在 'fruit_cucumber' 的值上加 1
+        dictionary['fruit_cucumber'] += 1
+    return dictionary
+
+
+
+# 判断
+def determine(matrix):
+
+    # print(matrix)
+
+    # 植株，总共有 5 种：'nan', 'plant_rice', plant_wheat, 'plant_corn', 'plant_cucumber'
+    # 三个函数处理
+    # 第一：字典只有 nan 的随便猜一个
+    # 第二：有 nan 有其他的，删掉 nan
+    # 第三：有多个植株的，保留最大的
+    matrix_plants = matrix[0:3]     # 注意，切片是包含左边不包含右边
+    keys = ['nan', 'plant_rice', 'plant_wheat', 'plant_corn', 'plant_cucumber']
+    matrix_plants = replace_nan(matrix_plants, keys)
+    matrix_plants = remove_nan(matrix_plants)
+    matrix_plants = keep_max_value(matrix_plants)
+    matrix_plants = dict_to_list(matrix_plants)
+    print(matrix_plants)
+
+
+    # 果实，总共有 4 种，'nan', 'fruit_corn', 'fruit_cucumber', 'fruit_watermelon'
+    # 西瓜和玉米数量相同，玉米+1-2
+    # 西瓜和黄瓜数量相同，黄瓜+1-3
+    # 玉米和黄瓜数量相同，黄瓜+1
+    # {'fruit_watermelon': 2, 'fruit_cucumber': 2, 'nan': 3}
+    matrix_frult = matrix[3]
+    matrix_frult = modify_values(matrix_frult)
+    # print(matrix_frult)
+
+    # 输出最后的组合
+    matrix_plants_frult = matrix_plants
+    key, value = get_max_value_key(matrix_frult)
+    matrix_plants_frult.append(key)
+    matrix_plants_frult.append(value)
+    # print(matrix_plants_frult)
+
+    return matrix_plants_frult
+
+# 按字典替换列表
+def replace_by_dict(input_list, replacement_dict):
+    return list(map(replacement_dict.get, input_list))
+
+def list_rename(lst):
+    replacement_dict = {
+        'plant_corn': '玉米',
+        'plant_cucumber': '黄瓜',
+        'plant_rice': '水稻',
+        'plant_wheat': '小麦'
+    }
+    lst = replace_by_dict(lst, replacement_dict)
+
+    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
+    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
+    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
+    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
+    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
+    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
+    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
+    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
+    # name_areas 是区域的顺序，会按顺序播报，要修改就改这个，其他一点不要动
+    name_areas = ['E_', 'D_', 'B_']
+    lst = [str(a) + str(b) for a, b in zip(name_areas, lst)]
+
+    return lst
+
+def element_rename(key):
+    replacement_dict = {
+        'fruit_corn': '玉米',
+        'fruit_cucumber': '黄瓜',
+        'fruit_watermelon': '西瓜',
+    }
+    return "F_" + str(replacement_dict[key])
+
+def element_rename_number(key):
+    replacement_dict = {
+        1: '数量为1个',
+        2: '数量为2个',
+        3: '数量为3个',
+        4: '数量为4个',
+        5: '数量为5个',
+        6: '数量为6个',
+        7: '数量为7个',
+        8: '数量为8个',
+        9: '数量为9个',
+    }
+    return str(replacement_dict[key])
+
+def mp3_modify(lst):    
+    # 正式播报
+    for i in lst:
+        os.system(f'ffplay -nodisp -autoexit /home/ucar/Music/mp3/{i}.mp3')
+
+def player():
+    # 读取 result
     result_file_path = '/home/ucar/catkin_test_ws/src/image/result.txt'
-    # 定义植物和水果的映射关系
-    plant_type_map = {
-        'plant_cucumber': '黄瓜植株',
-        'plant_corn': '玉米植株',
-        'plant_wheat': '小麦植株',
-        'plant_rice': '水稻植株',
-    }
-    fruit_type_map = {
-        'fruit_corn': '玉米果实',
-        'fruit_watermelon': '西瓜果实',
-        'fruit_cucumber': '黄瓜果实',
-    }
-
-    # 初始化统计结果的字典
-    room_plants = {}
-    fruit_counts = {}
-
-    # 读取result.txt文件并进行统计
-    with open(result_file_path, 'r') as file:
-        lines = file.readlines()
-
-    # 处理每一行的内容，统计植物类型
-    for i, line in enumerate(lines):
-        # 判断当前行是否为空，如果为空，则随机选择一个未知植株
-        if not line.strip():
-            room_plants[f'Room_{i+1}'] = '未知植株'
-        else:
-            plant_types = line.strip().split(' ')
-            plant_counts = {plant_type: plant_types.count(plant_type) for plant_type in plant_types}
-            max_plant = max(plant_counts, key=plant_counts.get)
-            room_plants[f'Room_{i+1}'] = plant_type_map.get(max_plant, '未知植株')
-
-    # 统计水果类型
-    fruits = lines[3].strip().split(' ')
-    for fruit in fruits:
-        fruit_counts[fruit] = fruit_counts.get(fruit, 0) + 1
-
-    # 找出最多的水果种类和数量
-    max_fruit = max(fruit_counts, key=fruit_counts.get)
-    max_fruit_count = fruit_counts[max_fruit]
-
-    # 随机选择一个没有出现过的植株作为未知果实的替代
-    used_plants = set(room_plants.values())
-    unknown_plants = list(set(plant_type_map.values()) - used_plants)
-    for i, room in enumerate(room_plants):
-        if room_plants[room] == '未知植株':
-            if unknown_plants:
-                room_plants[room] = random.choice(unknown_plants)
-                unknown_plants.remove(room_plants[room])
-
-    # 构造输出字符串                ，D区域种植的作物为{}
-    result_string = "任务完成E区域种植的作物为{}D区域种植的作物为{}E区域种植的作物为{}F区域存放的果实为{}数量为{}个".format(
-        room_plants['Room_1'],
-        room_plants['Room_2'],
-        room_plants['Room_3'],
-        # room_plants['Room_4'],
-        fruit_type_map.get(max_fruit, '未知果实'),
-        max_fruit_count
-    )
-
-    # 写一个列表
-    mp3_results = [
-        [['任务完成.mp3'], 0], 
-        [['B_小麦.mp3', 'B_水稻.mp3', 'B_玉米.mp3', 'B_黄瓜.mp3'], 0], 
-        [['C_小麦.mp3', 'C_水稻.mp3', 'C_玉米.mp3', 'C_黄瓜.mp3'], 0], 
-        [['D_小麦.mp3', 'D_水稻.mp3', 'D_玉米.mp3', 'D_黄瓜.mp3'], 0], 
-        [['E_小麦.mp3', 'E_水稻.mp3', 'E_玉米.mp3', 'E_黄瓜.mp3'], 0], 
-        [['F_玉米.mp3', 'F_西瓜.mp3', 'F_黄瓜.mp3'], 0], 
-        [['数量为1个.mp3', '数量为2个.mp3', '数量为3个.mp3', '数量为4个.mp3', '数量为5个.mp3'], 0], 
-    ]
-
-    plant_mapping = {
-        "小麦植株": 0,
-        "水稻植株": 1,
-        "玉米植株": 2,
-        "黄瓜植株": 3,
-    }
-
-    fruit_mapping = {
-        "玉米果实": 0,
-        "西瓜果实": 1,
-        "黄瓜果实": 2,
-    }
-
-    number_mapping = {
-        1: 0,
-        2: 1,
-        3: 2,
-        4: 3,
-        5: 4,
-    }
+    result_list = file_to_list(result_file_path)
     
-    # 修改结果的示例
-    mp3_results[0][1] = 0   # 任务完成（无需修改）
-    mp3_results[1][1] = plant_mapping[room_plants['Room_1']]   # B
-    mp3_results[2][1] = plant_mapping[room_plants['Room_2']]   # C
-    mp3_results[3][1] = plant_mapping[room_plants['Room_3']]   # D
-    mp3_results[4][1] = plant_mapping[room_plants['Room_4']]   # E
-    mp3_results[5][1] = fruit_mapping[fruit_type_map.get(max_fruit, '未知果实')]   # F
-    mp3_results[6][1] = number_mapping[max_fruit_count]   # 数量，注意，0 号文件是 1 个，1 号 文件是 2 个，如果怕错可以加个字典映射
+    # 解析 result
+    result_count = []
+    for ls in result_list:
+        result_count.append(count_elements(ls))
+    
+    # 判断 result
+    result_determine = determine(result_count)
 
-    # 7 次播放
-    for result in mp3_results:
-        audios = result[0]
-        number = result[1]
-        if number == plant_mapping[room_plants['Room_3']]:   # 需要根据情况进行修改
-            continue
-        os.system(f'ffplay -nodisp -autoexit /home/ucar/Music/mp3/{audios[number]}')
-
-    return result_string
+    # 重命名
+    result_mp3_plant = list_rename(result_determine[0:3])
+    result_mp3_frult = element_rename(result_determine[3])
+    result_mp3_number = element_rename_number(result_determine[4])
+    result_mp3 = ['任务完成']
+    result_mp3 = result_mp3 + result_mp3_plant
+    result_mp3.append(result_mp3_frult)
+    result_mp3.append(result_mp3_number)
+    mp3_modify(result_mp3)
+    print(result_mp3)
 
 
 class liu_control:
