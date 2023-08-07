@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/asr_sample.dir/samples/asr_offline_sample/asr_offline_sample.c.o  -o devel/lib/ucar_start/asr_sample  -L/home/ucar/catkin_test_ws/src/ucar_start/libs/x64 -Wl,-rpath,/home/ucar/catkin_test_ws/src/ucar_start/libs/x64 -lmsc 

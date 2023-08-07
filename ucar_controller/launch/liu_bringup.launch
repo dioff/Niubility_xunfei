@@ -1,0 +1,40 @@
+<launch>
+    <include file="$(find ucar_controller)/launch/base_driver.launch"/>
+    <!-- <include file="$(find ucar_controller)/launch/base_driver.launch"/> -->
+    
+    <node pkg="imu_calib" type="apply_calib" name="apply_calib" output="screen" respawn="false">
+      <remap from="raw" to="imu" />
+      <param name="calib_file" value="$(find imu_calib)/../launch/imu_calib.yaml" />
+      <param name="calibrate_gyros" value="true" />
+      <remap from="corrected" to="imu/data_raw" />
+    </node>
+    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="true" >
+      <param name="fixed_frame" value="odom" />
+      <param name="use_mag" value="false" />
+      <param name="publish_tf" value="false" />
+      <param name="use_magnetic_field_msg" value="true" />  
+      <param name="world_frame" value="enu" />
+      <remap from="imu/data" to="imu_data" />
+    </node>
+    <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf" output="screen"  respawn="true">
+      <param name="output_frame" value="odom"/>
+      <param name="base_footprint_frame" value="base_link"/>
+      <param name="freq" value="30.0"/>
+      <param name="sensor_timeout" value="1.0"/>
+      <param name="odom_used" value="true"/>
+      <param name="imu_used" value="true"/>
+      <param name="vo_used" value="false"/>
+      <param name="gps_used" value="false"/>
+      <param name="debug" value="false"/>
+      <!-- <remap from="imu_data" to="/imu" /> -->
+      <param name="self_diagnose" value="false"/>
+    </node>
+    <node pkg="ucar_controller" type="liu_odom_ekf.py" name="liu_odom_ekf" output="screen">
+        <remap from="input" to="/robot_pose_ekf/odom_combined"/>
+        <remap from="output" to="/odom"/>
+    </node>
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_imu" args="0.05 -0.05 0.05 0 0 0 /base_link /imu 40"/>
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser" args="-0.11 0.0 0.165 -0.07 0.0  0.0 /base_link /laser_frame 40" />
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera" args="0.15 0.0 0.15 -1.570795 0.0  -2.007126944 /base_link /camera_link 40" />
+
+</launch>

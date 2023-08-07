@@ -1,0 +1,8 @@
+prefix=/home/ucar/catkin_test_ws/src/ucar_start/build/devel
+
+Name: ucar_start
+Description: Description of ucar_start
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ucar/catkin_test_ws/src/ucar_start/build/devel/lib 
+Requires: 

@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ucar/catkin_test_ws/src/ucar_start/include/msp_cmn.h
+msp_types.h
+/home/ucar/catkin_test_ws/src/ucar_start/include/msp_types.h
+
+/home/ucar/catkin_test_ws/src/ucar_start/include/msp_errors.h
+
+/home/ucar/catkin_test_ws/src/ucar_start/include/msp_types.h
+
+/home/ucar/catkin_test_ws/src/ucar_start/include/qisr.h
+msp_types.h
+/home/ucar/catkin_test_ws/src/ucar_start/include/msp_types.h
+
+/home/ucar/catkin_test_ws/src/ucar_start/src/asr_offline_sample.cpp
+stdlib.h
+-
+stdio.h
+-
+string.h
+-
+errno.h
+-
+unistd.h
+-
+../include/qisr.h
+/home/ucar/catkin_test_ws/src/ucar_start/include/qisr.h
+../include/msp_cmn.h
+/home/ucar/catkin_test_ws/src/ucar_start/include/msp_cmn.h
+../include/msp_errors.h
+/home/ucar/catkin_test_ws/src/ucar_start/include/msp_errors.h
+

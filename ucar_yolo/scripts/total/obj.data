@@ -1,0 +1,5 @@
+classes= 7
+train  = /home/ucar/catkin_test_ws/src/ucar_yolo/scripts/total/train.txt
+valid  = /home/ucar/catkin_test_ws/src/ucar_yolo/scripts/total/test.txt
+names = /home/ucar/catkin_test_ws/src/ucar_yolo/scripts/total/obj.names
+backup = /home/ucar/catkin_test_ws/src/ucar_yolo/scripts/total/backup
