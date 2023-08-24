@@ -1,4 +1,0 @@
-plant_wheat plant_corn plant_wheat plant_wheat plant_wheat plant_corn plant_wheat plant_wheat 
-plant_rice plant_rice plant_rice plant_rice plant_rice plant_rice 
-plant_cucumber
-fruit_cucumber fruit_watermelon fruit_cucumber fruit_cucumber fruit_watermelon plant_wheat fruit_cucumber fruit_cucumber 

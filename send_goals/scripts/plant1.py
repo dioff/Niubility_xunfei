@@ -15,16 +15,17 @@ import time
 waypoints = {
 
     'uphill-1': (0.93, -0.46, -0.70, 0.71),
-
+    
+    'F0': (0.94, -2.78, -0.70, 0.71),
     'F1': (0.39, -3.32, -0.45, 0.89),
     'F4': (1.26, -3.66, -0.93, 0.36),
 
-    'F-LU': (1.78, -4.95, -0.66, 0.74),
+    'F-LU': (1.76, -4.95, -0.66, 0.74),
     # 'F-LL': (1.42, -5.35, -0.07, 1.00),
     # 'F-RU': (0.07, -5.03, -0.70, 0.71), 
     # 'F-RR': (0.28, -5.40, -1.00, 0.03),
-    #  
-    'F3': (0.92, -2.30, 0.95, 0.30),  
+
+    'F3': (0.92, -2.30, 0.91, 0.40),  
     'F2': (0.92, -2.30, 0.33, 0.95),
     'uphill-2': (0.92, -2.30, 0.71, 0.70),
     'downhill': (0.93, -0.36, 0.71, 0.70),
@@ -81,7 +82,6 @@ def count_elements(lst):
     return dict(Counter(lst))
 
 # 将列表中只有 'nan' 键的字典，替换为示例中没出现过的，随机在 5 种键中抽一个，字典元素的数量设为 1
-
 def replace_nan(list_of_dicts, keys):
     # 将 keys 转换为集合以方便操作
     keys = set(keys)
@@ -101,6 +101,28 @@ def replace_nan(list_of_dicts, keys):
                 dictionary[new_key] = dictionary.pop('nan')
     return list_of_dicts
 
+def replace_nan_in_dicts(dict_list, keys):
+    for i, d in enumerate(dict_list):
+        # 如果字典只有一个键且这个键为'nan'
+        if list(d.keys()) == ['nan']:
+            # 从没有出现过的键中随机选取一个
+            not_in_dict_keys = [k for k in keys if k not in [list(dic.keys())[0] for dic in dict_list]]
+            if not_in_dict_keys:  # 判断是否有未出现过的键
+                new_key = random.choice(not_in_dict_keys)
+                # 替换字典
+                dict_list[i] = {new_key: 1}
+    return dict_list
+
+# 如果字典中只有 'nan' 键的元素，就删除这个元素，并替换为 keys 列表中随便一个元素为新的键，键的值为1，然后return新的字典
+def replace_nan_in_dicts_fruit(dictionary, keys):
+    if len(dictionary) == 1 and 'nan' in dictionary:
+        # 从 keys 列表中随机选择一个键
+        new_key = random.choice(keys)
+        # 用新的键和值替换字典中的 'nan' 键
+        dictionary[new_key] = 1
+        del dictionary['nan']
+    return dictionary
+
 # 将列表中元素有 'nan' 的字典，删除掉 'nan' 元素
 def remove_nan(list_of_dicts):
     for dictionary in list_of_dicts:
@@ -119,6 +141,11 @@ def keep_max_value(list_of_dicts):
             list_of_dicts[idx] = {max_key: max_value}  # 创建一个只包含最大值的新字典
     return list_of_dicts
 
+def remove_nan_fruit(dictionary):
+    # 如果字典中包含 'nan'，则删除它
+    if 'nan' in dictionary:
+        del dictionary['nan']
+    return dictionary
 
 # 统计列表中每个字典的键总共有多少种
 def dict_to_list(list_of_dicts):
@@ -136,7 +163,6 @@ def get_max_value_key(input_dict):
     max_value = input_dict[max_key]
     return max_key, max_value
 
-# import random  # 前面已导入
 def modify_values(dictionary):
     # 如果字典中存在 'fruit_watermelon' 和 'fruit_cucumber'，并且他们的值相等
     if 'fruit_watermelon' in dictionary and 'fruit_cucumber' in dictionary and dictionary['fruit_watermelon'] == dictionary['fruit_cucumber']:
@@ -152,42 +178,55 @@ def modify_values(dictionary):
         dictionary['fruit_cucumber'] += 1
     return dictionary
 
+# 输入是由字典组成的列表，如果列表中有空字典，就在 keys 列表中随机选一个键放进去，值为1，最后返回列表
+def empty_plant(dict_list, keys):
+    for i, dictionary in enumerate(dict_list):
+        if not dictionary:  # 检查字典是否为空
+            random_key = random.choice(keys)  # 随机选择一个键
+            dict_list[i] = {random_key: 1}  # 将随机选择的键和值1添加到空字典中
+    return dict_list
 
+# 如果输入的字典是空字典，就在 keys 列表中随机选一个键放进去，值为1，最后返回字典
+def empty_fruit(input_dict, keys):
+    if not input_dict:  # 检查字典是否为空
+        random_key = random.choice(keys)  # 从 keys 列表中随机选择一个键
+        input_dict[random_key] = 3  # 将随机选择的键和值 1 添加到字典中
+    return input_dict
 
 # 判断
 def determine(matrix):
 
-    # print(matrix)
-
-    # 植株，总共有 5 种：'nan', 'plant_rice', plant_wheat, 'plant_corn', 'plant_cucumber'
-    # 三个函数处理
+    # 植株，总共有 5 种：'nan', 'plant_corn', 'plant_cucumber', 'plant_rice', 'plant_wheat'
     # 第一：字典只有 nan 的随便猜一个
     # 第二：有 nan 有其他的，删掉 nan
     # 第三：有多个植株的，保留最大的
-    matrix_plants = matrix[0:3]     # 注意，切片是包含左边不包含右边
-    keys = ['nan', 'plant_rice', 'plant_wheat', 'plant_corn', 'plant_cucumber']
-    matrix_plants = replace_nan(matrix_plants, keys)
+    # 第四：空行判断
+    matrix_plants = matrix[0:4]     # 注意，切片是包含左边不包含右边
+    keys = ['plant_corn', 'plant_cucumber', 'plant_rice', 'plant_wheat']
+    matrix_plants = replace_nan_in_dicts(matrix_plants, keys)
     matrix_plants = remove_nan(matrix_plants)
     matrix_plants = keep_max_value(matrix_plants)
-    matrix_plants = dict_to_list(matrix_plants)
-    print(matrix_plants)
-
+    matrix_plants = empty_plant(matrix_plants, keys)
 
     # 果实，总共有 4 种，'nan', 'fruit_corn', 'fruit_cucumber', 'fruit_watermelon'
+    # 第一：字典只有 nan 的随便猜一个
+    # 第二：删除 nan
+    # 第三：最大判断
     # 西瓜和玉米数量相同，玉米+1-2
     # 西瓜和黄瓜数量相同，黄瓜+1-3
     # 玉米和黄瓜数量相同，黄瓜+1
-    # {'fruit_watermelon': 2, 'fruit_cucumber': 2, 'nan': 3}
-    matrix_frult = matrix[3]
+    matrix_frult = matrix[4]
+    keys_fruit = ['fruit_corn', 'fruit_cucumber', 'fruit_watermelon']
+    matrix_frult = replace_nan_in_dicts_fruit(matrix_frult, keys_fruit)
+    matrix_frult = remove_nan_fruit(matrix_frult)
     matrix_frult = modify_values(matrix_frult)
-    # print(matrix_frult)
+    matrix_frult = empty_fruit(matrix_frult, keys_fruit)
 
     # 输出最后的组合
-    matrix_plants_frult = matrix_plants
+    matrix_plants_frult = dict_to_list(matrix_plants)
     key, value = get_max_value_key(matrix_frult)
     matrix_plants_frult.append(key)
     matrix_plants_frult.append(value)
-    # print(matrix_plants_frult)
 
     return matrix_plants_frult
 
@@ -205,15 +244,8 @@ def list_rename(lst):
     lst = replace_by_dict(lst, replacement_dict)
 
     # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
-    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
-    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
-    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
-    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
-    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
-    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
-    # 重点！！！！！！！！！！！！！！！！！！！！！！！！！！
     # name_areas 是区域的顺序，会按顺序播报，要修改就改这个，其他一点不要动
-    name_areas = ['E_', 'D_', 'B_']
+    name_areas = ['E_', 'D_', 'C_', 'B_']
     lst = [str(a) + str(b) for a, b in zip(name_areas, lst)]
 
     return lst
@@ -244,10 +276,12 @@ def mp3_modify(lst):
     # 正式播报
     for i in lst:
         os.system(f'ffplay -nodisp -autoexit /home/ucar/Music/mp3/{i}.mp3')
+        # os.system(f'ffplay -nodisp -autoexit mp3/{i}.mp3')
 
 def player():
     # 读取 result
     result_file_path = '/home/ucar/catkin_test_ws/src/image/result.txt'
+    # result_file_path = r'C:\Users\Dao\Works\泰州学院\比赛与项目\讯飞机器人比赛\代码\语音\$最新\test\result.txt'
     result_list = file_to_list(result_file_path)
     
     # 解析 result
@@ -259,13 +293,17 @@ def player():
     result_determine = determine(result_count)
 
     # 重命名
-    result_mp3_plant = list_rename(result_determine[0:3])
-    result_mp3_frult = element_rename(result_determine[3])
-    result_mp3_number = element_rename_number(result_determine[4])
+    result_mp3_plant = list_rename(result_determine[0:4])
+    result_mp3_frult = element_rename(result_determine[4])
+    result_mp3_number = element_rename_number(result_determine[5])
+
+    # 合成最终列表
     result_mp3 = ['任务完成']
     result_mp3 = result_mp3 + result_mp3_plant
     result_mp3.append(result_mp3_frult)
     result_mp3.append(result_mp3_number)
+
+    # 运行测试
     mp3_modify(result_mp3)
     print(result_mp3)
 

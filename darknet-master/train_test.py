@@ -1,12 +1,12 @@
 import glob, os
 
-imgs_dir = '/home/ucar/catkin_test_ws/src/darknet-master/total/img'
+imgs_dir = '/home/liu/Desktop/比赛资料/讯飞/catkin_test_ws/src/darknet-master/total/img'
 print(imgs_dir)
 
 percentage_test = 10
 
-file_train = open('/home/ucar/catkin_test_ws/src/darknet-master/total/train.txt', 'w')
-file_test = open('/home/ucar/catkin_test_ws/src/darknet-master/total/test.txt', 'w')
+file_train = open('/home/liu/Desktop/比赛资料/讯飞/catkin_test_ws/src/darknet-master/total/train.txt', 'w')
+file_test = open('/home/liu/Desktop/比赛资料/讯飞/catkin_test_ws/src/darknet-master/total/test.txt', 'w')
 
 counter = 1
 index_test = round(100 / percentage_test)

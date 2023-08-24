@@ -1,0 +1,5 @@
+plant_corn plant_corn plant_corn nan nan 
+plant_wheat plant_wheat plant_corn nan 
+plant_cucumber plant_cucumber plant_cucumber nan nan 
+plant_rice plant_rice plant_rice plant_rice plant_rice  nan nan  nan nan  nan nan 
+fruit_watermelon fruit_cucumber fruit_cucumber fruit_cucumber fruit_watermelon fruit_cucumber plant_wheat fruit_cucumber  fruit_cucumber fruit_cucumber fruit_cucumber

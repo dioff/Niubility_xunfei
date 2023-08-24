@@ -30,6 +30,7 @@ ninja.zip
 vcpkg_installed/
 !build/darknet/YoloWrapper.cs
 .fuse*
+*.weights
 build/*.cmake
 build/*.ninja
 build/*.txt

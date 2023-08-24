@@ -199,9 +199,6 @@ def save_result():
     with open('/home/ucar/catkin_test_ws/src/image/1_1.txt','r') as f:
         for line in f.readlines():
             result_list1.append(line.split()[0])
-    with open('/home/ucar/catkin_test_ws/src/image/1_2.txt','r') as f:
-        for line in f.readlines():
-            result_list1.append(line.split()[0])
     while len(result_list1) < 5:
         result_list1.append("nan")
     result_list1.append('\n')
@@ -210,9 +207,6 @@ def save_result():
         for line in f.readlines():
             result_list2.append(line.split()[0])
     with open('/home/ucar/catkin_test_ws/src/image/2_1.txt','r') as f:
-        for line in f.readlines():
-            result_list2.append(line.split()[0])
-    with open('/home/ucar/catkin_test_ws/src/image/2_2.txt','r') as f:
         for line in f.readlines():
             result_list2.append(line.split()[0])
     while len(result_list2) < 5:

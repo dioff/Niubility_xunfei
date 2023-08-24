@@ -1,5 +1,5 @@
 classes= 7
-train  = /home/ubuntu/darknet-master/total/train.txt
-valid  = /home/ubuntu/darknet-master/total/test.txt
+train  = /home/liu/Desktop/比赛资料/讯飞/catkin_test_ws/src/darknet-master/total/train.txt
+valid  = /home/liu/Desktop/比赛资料/讯飞/catkin_test_ws/src/darknet-master/total/test.txt
 names = total/obj.names
-backup = /home/ubuntu/darknet-master/total/backup
+backup = /home/liu/Desktop/比赛资料/讯飞/catkin_test_ws/src/darknet-master/total/backup

@@ -16,22 +16,22 @@ waypoints = {
 
     'uphill-1': (0.93, -0.46, -0.70, 0.71),
 
-    'F1': (0.95, -3.00, -0.70, 0.71),
+    'F1': (0.94, -3.25, -0.70, 0.71),
 
-    'F-LU': (1.57, -4.80, -0.7, 0.71),
-    # 'F-LL': (1.34, -5.17, -0.05, 1.00),
-    # 'F-RU': (0.11, -5.03, -0.81, 0.59), 
-    # 'F-RR': (0.42, -5.17, -1.00, 0.04), 
+    # 'F-LU': (1.74, -4.95, -0.66, 0.74),
+    'F-LL': (1.42, -5.35, -0.07, 1.00),
+    # 'F-RU': (0.07, -5.03, -0.70, 0.71), 
+    # 'F-RR': (0.28, -5.40, -1.00, 0.03), 
 
     'F3': (0.92, -2.30, 0.95, 0.30),  
     'F2': (0.92, -2.30, 0.33, 0.95),
     'uphill-2': (0.92, -2.30, 0.71, 0.70),
-    'downhill': (0.94, -0.36, 0.71, 0.70),
+    'downhill': (0.93, -0.36, 0.71, 0.70),
     # 'turn': (0.94, -0.36, 0.00, 1.00),
 
     'E1': (2.80, -0.56, -0.12, 0.99),
-    'E2': (2.80, -0.56, -0.42, 0.90),
-    'E3': (2.80, -0.56, -0.69, 0.72),
+    'E2': (2.80, -0.56, -0.46, 0.89),
+    'E3': (2.80, -0.56, -0.90, 0.44),
     # 'E4': (2.80, -0.56, -0.92, 0.38),
 
     'D1': (2.79, -3.68, 0.26, 0.97),
@@ -271,7 +271,6 @@ def player():
     mp3_modify(result_mp3)
     print(result_mp3)
 
-
 class liu_control:
     def __init__(self):
         self.cmd_vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=1)
@@ -339,7 +338,7 @@ if __name__ == '__main__':
                     liu.save_img(2, coun2, 10)
                     coun2 += 1
 
-                # elif waypoint_name in ['C1', 'C2', 'C3', 'C4']:
+                # elif waypoint_name in ['C1', 'C2', 'C3']:
                 #     liu.save_img(3, coun3, 10)
                 #     coun3 += 1
                 
@@ -350,6 +349,7 @@ if __name__ == '__main__':
                 elif waypoint_name in ['F1', 'F-LU', 'F-LL', 'F-RU', 'F-RR', 'F3', 'F2']:
                     liu.save_img(5, coun5, 10)
                     coun5 += 1
+
                 elif waypoint_name in ['B4', 'C4']:
                     liu.yolo_start()
                 # elif waypoint_name == 23:
@@ -373,10 +373,7 @@ if __name__ == '__main__':
                 rospy.loginfo("开始等待yolo执行结束")
                 time.sleep(0.1)
                 break
-        rospy.loginfo("开始分析数据")        
-        tts_result = mp3_modify()
-        rospy.loginfo(tts_result)
-        # liu.report_result(tts_result)
+        player()
         rospy.spin()
     except rospy.ROSInterruptException:
         rospy.loginfo("Liu interrupted.")
